@@ -1761,7 +1761,7 @@
   </div>
 
 <script>
-  const LAUNCHER_VERSION="1.0.44";
+  const LAUNCHER_VERSION="1.0.46";
   try{var __vb=document.createElement("div");__vb.textContent="v"+LAUNCHER_VERSION;__vb.style.cssText="position:fixed;right:9px;bottom:7px;font-size:12px;color:#7a7a7a;z-index:99999;font-family:monospace;pointer-events:none;letter-spacing:1px;";document.body.appendChild(__vb);}catch(e){}
   // ===== Страховка от молчаливых сбоев =====
   // Раньше, если запрос к начинке падал, кнопка просто ничего не делала, и игрок
@@ -5456,7 +5456,15 @@
       let acc=gameAccount;
       if(!acc){
         elyStatus("Открываю окно входа…");
-        try{ acc=await window.javelin.login(); }catch(e){ elyStatus("Вход отменён.",true); return; }
+        try{ acc=await window.javelin.login(); }
+        catch(e){
+          // Игрок закрыл окно входа — чаще всего потому, что аккаунта у него ещё
+          // нет и он идёт его заводить. Это не поломка, красным пугать незачем:
+          // раньше висело алое «Вход отменён», и человек думал, что сломался сам
+          // лаунчер. Пишем спокойно и подсказываем следующий шаг.
+          elyStatus("Окно входа закрыто. Если аккаунта ещё нет — нажми «Нет аккаунта? Создать» ниже.");
+          return;
+        }
         gameAccount=acc; updateGameAcc();
       }
       elyStatus("Привязываю профиль…");
@@ -5466,7 +5474,16 @@
   if(elyCode)elyCode.addEventListener("keydown",e=>{if(e.key==="Enter")elyBindBtn.click();});
   // Кнопки открывают НАСТОЯЩИЙ сайт Ely.by в окне лаунчера: пароль вводится у них,
   // через код лаунчера он не проходит.
-  function openEly(sub){ try{ if(window.javelin&&window.javelin.openElyProfile)window.javelin.openElyProfile(sub||""); }catch(e){} }
+  function openEly(sub){
+    // Прежнее сообщение убираем: иначе оно висит поверх нового действия —
+    // игрок уже пошёл заводить аккаунт, а на экране всё ещё «Вход отменён».
+    var подпись = { register:"Открываю страницу создания аккаунта Ely.by…",
+                    forgot:"Открываю восстановление пароля…",
+                    twofa:"Открываю двухшаговый вход…",
+                    skin:"Открываю смену скина…", skins:"Открываю каталог скинов…" };
+    elyStatus(подпись[sub] || "Открываю Ely.by…");
+    try{ if(window.javelin&&window.javelin.openElyProfile)window.javelin.openElyProfile(sub||""); }catch(e){}
+  }
   var _elyRegBtn=document.getElementById("elyRegBtn"); if(_elyRegBtn)_elyRegBtn.addEventListener("click",()=>openEly("register"));
   // Восстановление пароля и двухшаговый вход — страницы самого Ely.by: письмо
   // и код шлёт он. Наша задача — довести игрока до нужной страницы.
@@ -5479,7 +5496,12 @@
   var _skinsBtn=document.getElementById("skinsCatalogBtn"); if(_skinsBtn)_skinsBtn.addEventListener("click",()=>openEly("skins"));
   // окно профиля Ely.by закрыли — вдруг там сменили ник
   if(window.javelin&&window.javelin.onElyProfileClosed)window.javelin.onElyProfileClosed(async()=>{
-    if(!gameAccount||!gameAccount.uuid)return;
+    // Ещё не вошёл — значит закрыл страницу Ely.by (скорее всего, только что
+    // завёл там аккаунт). Подсказываем следующий шаг, а не оставляем в пустоте.
+    if(!gameAccount||!gameAccount.uuid){
+      elyStatus("Аккаунт создан? Теперь нажми «Войти в аккаунт» и введи ник с паролем от Ely.by.");
+      return;
+    }
     let nm=null;
     try{ nm=await window.javelin.elyName(gameAccount.uuid); }catch(e){}
     if(nm&&nm!==gameAccount.name){

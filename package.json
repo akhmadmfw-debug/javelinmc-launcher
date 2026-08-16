@@ -1,6 +1,6 @@
 {
   "name": "javelinmc-launcher",
-  "version": "1.0.45",
+  "version": "1.0.46",
   "description": "JavelinMC - custom Minecraft launcher",
   "main": "main.js",
   "author": "JavelinMC",
