@@ -37,8 +37,30 @@ jobs:
             echo "::error::Не задан секрет JV_CONFIG — положите в него содержимое config.json"
             exit 1
           fi
-          printf '%s' "$JV_CONFIG" > config.json
-          node -e "require('./config.json'); console.log('config.json на месте и читается')"
+          printf '%s' "$JV_CONFIG" > config.raw
+          # Приводим в порядок то, что вставили руками: убираем метку кодировки
+          # в начале (её любит добавлять блокнот), виндовые переводы строк и
+          # пустоту по краям. Без этого разбор JSON спотыкается на первом же знаке.
+          node -e '
+            const fs = require("fs");
+            let t = fs.readFileSync("config.raw", "utf8");
+            t = t.replace(/^﻿/, "").replace(/\r/g, "").trim();
+            try {
+              const c = JSON.parse(t);
+              fs.writeFileSync("config.json", JSON.stringify(c, null, 2));
+              console.log("config.json на месте, полей: " + Object.keys(c).length);
+            } catch (e) {
+              // Само содержимое не печатаем — это ключи. Только приметы.
+              console.log("::error::Секрет JV_CONFIG не читается как JSON. " +
+                "Длина " + t.length + " знаков, начинается на «" + t.slice(0, 1) + "», " +
+                "заканчивается на «" + t.slice(-1) + "». Ошибка разбора в знаке " +
+                (String(e.message).match(/position (\\d+)/) || [,"?"])[1] + ".");
+              console.log("::error::Проверьте, что в секрет вставлено ВСЁ содержимое файла " +
+                "config.json — от открывающей { до закрывающей }, без кавычек вокруг.");
+              process.exit(1);
+            }
+          '
+          rm -f config.raw
 
       - name: Поставить зависимости
         run: npm ci
