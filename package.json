@@ -1,0 +1,105 @@
+{
+  "name": "javelinmc-launcher",
+  "version": "1.0.45",
+  "description": "JavelinMC - custom Minecraft launcher",
+  "main": "main.js",
+  "author": "JavelinMC",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "minecraft-launcher-core": "^3.18.2",
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "net.javelinmc.launcher",
+    "productName": "JavelinMC",
+    "artifactName": "JavelinMC-Setup-${version}.${ext}",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "akhmadmfw-debug",
+        "repo": "javelinmc-launcher"
+      }
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "ely-preload.js",
+      "ely-theme-preload.js",
+      "ely-login.html",
+      "electron-glue.js",
+      "javelinmc-launcher.html",
+      "splash.html",
+      "config.json",
+      "icon.png"
+    ],
+    "icon": "icon.ico",
+    "extraResources": [
+      {
+        "from": "authlib-injector.jar",
+        "to": "authlib-injector.jar"
+      },
+      {
+        "from": "runtime",
+        "to": "runtime"
+      },
+      {
+        "from": ".",
+        "to": ".",
+        "filter": [
+          "forge-*-installer.jar"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "installerHeaderIcon": "icon.ico"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "icon.png",
+      "category": "public.app-category.games",
+      "artifactName": "JavelinMC-${version}-${arch}.${ext}",
+      "identity": null,
+      "extraResources": [
+        {
+          "from": "authlib-injector.jar",
+          "to": "authlib-injector.jar"
+        },
+        {
+          "from": ".",
+          "to": ".",
+          "filter": [
+            "forge-*-installer.jar"
+          ]
+        }
+      ]
+    },
+    "dmg": {
+      "title": "JavelinMC ${version}"
+    },
+    "afterPack": "./build-hooks.js"
+  }
+}

@@ -1,0 +1,65 @@
+# Собирает установщик для macOS (.dmg) на настоящей маковской машине GitHub.
+#
+# Почему только macOS. Windows-версию мы собираем у себя: в неё вложена Java 17,
+# а один её файл весит 122 МБ — GitHub не принимает файлы больше 100 МБ, и в
+# репозиторий эта папка просто не поместится. Маковской сборке она не нужна:
+# там Java скачивается сама при первом запуске игры.
+#
+# Запуск: вкладка Actions -> «Сборка для macOS» -> Run workflow.
+
+name: Сборка для macOS
+
+on:
+  workflow_dispatch:          # запуск кнопкой из вкладки Actions
+  push:
+    tags: ["v*"]              # ...или сам, если поставить метку вида v1.0.45
+
+jobs:
+  mac:
+    name: macOS (Intel и Apple Silicon)
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # config.json в репозитории нет — там ключ CurseForge. Достаём его из
+      # секрета репозитория (Settings -> Secrets and variables -> Actions).
+      - name: Подготовить config.json
+        env:
+          JV_CONFIG: ${{ secrets.JV_CONFIG }}
+        run: |
+          if [ -z "$JV_CONFIG" ]; then
+            echo "::error::Не задан секрет JV_CONFIG — положите в него содержимое config.json"
+            exit 1
+          fi
+          printf '%s' "$JV_CONFIG" > config.json
+          node -e "require('./config.json'); console.log('config.json на месте и читается')"
+
+      - name: Поставить зависимости
+        run: npm ci
+
+      - name: Собрать .dmg
+        run: npx electron-builder --mac --publish never
+        env:
+          # Сертификата Apple у нас нет — просим сборщик не искать его и не
+          # тратить на это время. Приложение выйдет неподписанным: игрок при
+          # первом запуске откроет его правой кнопкой -> «Открыть».
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Показать, что получилось
+        run: ls -lh dist/*.dmg
+
+      - name: Забрать готовые файлы
+        uses: actions/upload-artifact@v4
+        with:
+          name: JavelinMC-macOS
+          if-no-files-found: error
+          path: |
+            dist/*.dmg
+            dist/*.blockmap
+            dist/latest-mac.yml

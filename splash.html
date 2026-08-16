@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>JavelinMC</title>
+<style>
+  /* Загрузочный экран. Показывается сразу при запуске и живёт, пока главное окно
+     готовится: раньше на его месте игрок видел мелькание пустой рамки и чёрный
+     прямоугольник. Никаких внешних шрифтов и картинок — экран обязан появиться
+     мгновенно, ещё до того как будет хоть какая-то сеть. */
+  html,body{margin:0;height:100%;background:transparent;overflow:hidden;
+    -webkit-user-select:none;user-select:none;cursor:default;}
+  .box{position:absolute;inset:0;border-radius:16px;
+    background:radial-gradient(120% 90% at 50% 50%,#0d0a16,#040308 70%);
+    border:1px solid rgba(255,205,130,.14);
+    box-shadow:0 24px 70px rgba(0,0,0,.55);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+    opacity:0;animation:in .45s ease forwards;}
+  @keyframes in{to{opacity:1;}}
+
+  .name{font-family:'Segoe UI Semibold','Segoe UI',-apple-system,'Helvetica Neue',sans-serif;
+    font-size:38px;font-weight:600;letter-spacing:9px;color:#fff;text-transform:uppercase;
+    text-shadow:0 0 10px rgba(255,236,190,.95),0 0 30px rgba(255,193,92,.75),0 0 72px rgba(255,150,20,.5);
+    animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:.75;letter-spacing:9px;}50%{opacity:1;letter-spacing:11px;}}
+
+  .bar{width:260px;height:2px;background:rgba(255,255,255,.1);overflow:hidden;}
+  .bar i{display:block;width:36%;height:100%;
+    background:linear-gradient(90deg,transparent,#ffe0a3,#fff,#ffb340,transparent);
+    animation:slide 1s linear infinite;}
+  @keyframes slide{from{transform:translateX(-120%);}to{transform:translateX(320%);}}
+
+  .sub{font-family:'Segoe UI',-apple-system,'Helvetica Neue',sans-serif;
+    font-size:12px;letter-spacing:4px;color:rgba(255,228,180,.7);text-transform:uppercase;}
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="name">JavelinMC</div>
+    <div class="bar"><i></i></div>
+    <div class="sub" id="sub">запускаю лаунчер</div>
+  </div>
+</body>
+</html>
