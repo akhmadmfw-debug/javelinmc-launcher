@@ -87,7 +87,8 @@
       "identity": null
     },
     "dmg": {
-      "title": "JavelinMC ${version}"
+      "title": "JavelinMC ${version}",
+      "backgroundColor": "#0d0a16"
     },
     "afterPack": "./build-hooks.js"
   }
