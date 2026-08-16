@@ -46,10 +46,6 @@
         "to": "authlib-injector.jar"
       },
       {
-        "from": "runtime",
-        "to": "runtime"
-      },
-      {
         "from": ".",
         "to": ".",
         "filter": [
@@ -60,7 +56,13 @@
     "win": {
       "target": "nsis",
       "icon": "icon.ico",
-      "signAndEditExecutable": false
+      "signAndEditExecutable": false,
+      "extraResources": [
+        {
+          "from": "runtime",
+          "to": "runtime"
+        }
+      ]
     },
     "nsis": {
       "oneClick": false,
@@ -82,20 +84,7 @@
       "icon": "icon.png",
       "category": "public.app-category.games",
       "artifactName": "JavelinMC-${version}-${arch}.${ext}",
-      "identity": null,
-      "extraResources": [
-        {
-          "from": "authlib-injector.jar",
-          "to": "authlib-injector.jar"
-        },
-        {
-          "from": ".",
-          "to": ".",
-          "filter": [
-            "forge-*-installer.jar"
-          ]
-        }
-      ]
+      "identity": null
     },
     "dmg": {
       "title": "JavelinMC ${version}"
